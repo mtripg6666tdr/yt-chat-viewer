@@ -1,0 +1,25 @@
+{
+  "name": "yt-chat-viewer",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc",
+    "start": "node dist"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "crypto-js": "^4.1.1",
+    "express": "^4.17.1",
+    "ytdl-core": "^4.9.1"
+  },
+  "devDependencies": {
+    "@types/crypto-js": "^4.0.2",
+    "@types/express": "^4.17.13",
+    "@types/node": "^16.11.10",
+    "typescript": "^4.5.2"
+  }
+}

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width; initial-scale=1.0">
+    <title>YouTube Chat Viewer</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <style>
+      body {
+        margin: 0px;
+      }
+      div.app {
+        display: flex;
+        flex-direction: row;
+      }
+      div.left_column {
+        width: 40vw;
+        flex-shrink: 0;
+      }
+      div.right_column_container {
+        width: 60vw;
+        flex-shrink: 0;
+        height: 100vh;
+        overflow: scroll;
+      }
+      div.right_column {
+        display: table;
+      }
+      div.right_column div.row {
+        display: table-row;
+      }
+      div.right_column div.row div {
+        display: table-cell;
+      }
+      iframe {
+        width: 98%;
+        height: 70%;
+        aspect-ratio: 16 / 9;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <div class="left_column">
+        <h1>YouTube Chat Viewer</h1>
+        <p>
+          <input type="text" id="v_url" size="50" placeholder="https://www.youtube.com/watch?v=...">
+          <button type="button" id="v_send">Load</button>
+        </p>
+        <p>
+          <pre id="status"></pre>
+        </p>
+        <div id="v_frame"></div>
+      </div>
+      <div class="right_column_container">
+        <div class="right_column"></div>
+      </div>
+    </div>
+    <script src="/common/main.js"></script>
+  </body>
+</html>

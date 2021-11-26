@@ -1,0 +1,6 @@
+dist
+yt-dlp
+yt-dlp.exe
+*.live_chat.json
+cache
+node_modules
