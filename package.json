@@ -1,7 +1,7 @@
 {
   "name": "yt-chat-viewer",
   "version": "1.0.0",
-  "description": "",
+  "description": "Easiest way to read efficiently chats of YouTube Live",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -10,8 +10,8 @@
     "start": "node dist"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "mtripg6666tdr",
+  "license": "MIT",
   "dependencies": {
     "crypto-js": "^4.1.1",
     "express": "^4.17.1",
