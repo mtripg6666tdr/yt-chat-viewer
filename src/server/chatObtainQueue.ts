@@ -1,14 +1,16 @@
-import { AuthorPhotoThumbnail, LiveChatItem } from "./chatJson";
+import { AuthorPhotoThumbnail, FluffyRun, LiveChatItem } from "./apiChatJson";
 import { SHA1 } from "crypto-js";
 import * as fs from "fs";
 import { ChildProcess, spawn } from "child_process";
 import ytdl from "ytdl-core";
 
 export type chatItem = {
-  text:string,
+  text:FluffyRun[],
   author:string,
   icons:AuthorPhotoThumbnail[],
   timestamp:string,
+  channelId:string,
+  paid?:string,
 };
 export type chatStatus = chatOKStatus|chatNotFoundStatus|chatPreparingStatus|chatErrorStatus;
 export type chatOKStatus = {
@@ -86,16 +88,41 @@ export class chatObtainManager {
       const chatItem = [] as chatItem[];
       for(let i = 0; i < chatData.length; i++){
         if(
-          chatData[i].replayChatItemAction.actions[0].addChatItemAction &&
-          chatData[i].replayChatItemAction.actions[0].addChatItemAction.item.liveChatTextMessageRenderer
+          chatData[i].replayChatItemAction.actions[0].addChatItemAction
         ){
-          const renderer = chatData[i].replayChatItemAction.actions[0].addChatItemAction.item.liveChatTextMessageRenderer;
-          chatItem.push({
-            text: renderer.message.runs[0].text,
-            author: renderer.authorName.simpleText,
-            icons: renderer.authorPhoto.thumbnails,
-            timestamp: renderer.timestampText.simpleText
-          });
+          const item = chatData[i].replayChatItemAction.actions[0].addChatItemAction.item;
+          if(item.liveChatTextMessageRenderer){
+            const renderer = item.liveChatTextMessageRenderer;
+            chatItem.push({
+              text: renderer.message.runs,
+              author: renderer.authorName.simpleText,
+              icons: renderer.authorPhoto.thumbnails,
+              timestamp: renderer.timestampText.simpleText,
+              channelId: renderer.authorExternalChannelId,
+            });
+          }else if(item.liveChatPaidMessageRenderer){
+            const renderer = item.liveChatPaidMessageRenderer;
+            chatItem.push({
+              text: renderer.message ? renderer.message.runs : [],
+              author: renderer.authorName.simpleText,
+              icons: renderer.authorPhoto.thumbnails,
+              timestamp: renderer.timestampText.simpleText,
+              channelId: renderer.authorExternalChannelId,
+              paid: renderer.purchaseAmountText.simpleText,
+            });
+          }else if(item.liveChatPaidStickerRenderer){
+            const renderer = item.liveChatPaidStickerRenderer;
+            chatItem.push({
+              text: [{
+                text: `スタンプを送信しました: ${renderer.sticker.accessibility.accessibilityData.label}`
+              }],
+              author: renderer.authorName.simpleText,
+              icons: renderer.authorPhoto.thumbnails,
+              timestamp: renderer.timestampText.simpleText,
+              channelId: renderer.authorExternalChannelId,
+              paid: renderer.purchaseAmountText.simpleText,
+            });
+          }
         }
       }
       return {
@@ -139,8 +166,9 @@ export class chatObtainManager {
           }
         })
       proc.stdout.on("data", (chunk) => {
-        if(this.procs[id]){
-          this.procs[id].log += chunk;
+        const chunkStr = chunk.toString() as string;
+        if(this.procs[id] && !chunkStr.includes("Destination") && !chunkStr.includes("live_chat.json")){
+          this.procs[id].log = (this.procs[id].log + chunkStr).replace(/\r.+\r/sg, "\r");
         }
       })
       this.procs[id] = {

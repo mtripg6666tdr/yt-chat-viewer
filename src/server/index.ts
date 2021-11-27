@@ -18,7 +18,7 @@ app.get("/common/main.js", (req, res) => {
   res.writeHead(200, "OK", {
     "Content-Type": "text/javascript; charset=utf-8"
   });
-  fs.createReadStream(path.join(__dirname, "../common/script.js"), {encoding: "utf-8"})
+  fs.createReadStream(path.join(__dirname, "../common/app.js"), {encoding: "utf-8"})
     .pipe(res);
 });
 
@@ -31,3 +31,5 @@ app.get("/api/chat", (req, res) => {
 });
 
 const server = app.listen(80);
+
+server.on("listening", () => console.log("server started"));

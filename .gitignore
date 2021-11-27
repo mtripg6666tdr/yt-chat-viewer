@@ -1,6 +1,10 @@
+*.map
 dist
 yt-dlp
 yt-dlp.exe
 *.live_chat.json
 cache
 node_modules
+common/app.js
+common/app.js.LICENSE.txt
+*.tmp.*
