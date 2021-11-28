@@ -96,7 +96,7 @@ export class chatObtainManager {
             const renderer = item.liveChatTextMessageRenderer;
             chatItem.push({
               text: renderer.message.runs,
-              author: renderer.authorName.simpleText,
+              author: renderer.authorName && renderer.authorName.simpleText,
               icons: renderer.authorPhoto.thumbnails,
               timestamp: renderer.timestampText.simpleText,
               channelId: renderer.authorExternalChannelId,
@@ -106,7 +106,7 @@ export class chatObtainManager {
             const renderer = item.liveChatPaidMessageRenderer;
             chatItem.push({
               text: renderer.message ? renderer.message.runs : [],
-              author: renderer.authorName.simpleText,
+              author: renderer.authorName && renderer.authorName.simpleText,
               icons: renderer.authorPhoto.thumbnails,
               timestamp: renderer.timestampText.simpleText,
               channelId: renderer.authorExternalChannelId,
@@ -119,7 +119,7 @@ export class chatObtainManager {
               text: [{
                 text: `スタンプを送信しました: ${renderer.sticker.accessibility.accessibilityData.label}`
               }],
-              author: renderer.authorName.simpleText,
+              author: renderer.authorName && renderer.authorName.simpleText,
               icons: renderer.authorPhoto.thumbnails,
               timestamp: renderer.timestampText.simpleText,
               channelId: renderer.authorExternalChannelId,
