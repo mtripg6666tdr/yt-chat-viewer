@@ -19,11 +19,11 @@ app.get("/common/app.js", (req, res) => {
   responseStaticContent(res, "app.js");
 });
 
-app.get("/common/app.LICENSE.txt", (req, res) => {
+app.get("/common/app.js.LICENSE.txt", (req, res) => {
   res.writeHead(200, "OK", {
     "Content-Type": "text/plain; charset=utf-8"
   });
-  responseStaticContent(res, "app.LICENSE.txt");
+  responseStaticContent(res, "app.js.LICENSE.txt");
 })
 
 app.get("/api/chat", (req, res) => {
