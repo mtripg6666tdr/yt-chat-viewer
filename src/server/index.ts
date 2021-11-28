@@ -1,7 +1,6 @@
 import express from "express";
-import * as fs from "fs";
-import * as path from "path";
 import { chatObtainManager } from "./chatObtainQueue";
+import { responseStaticContent } from "./util";
 
 const app = express();
 const queue = new chatObtainManager();
@@ -10,17 +9,22 @@ app.get(["/", "/index.html"], (req, res) => {
   res.writeHead(200, "OK", {
     "Content-Type": "text/html; charset=utf-8"
   });
-  fs.createReadStream(path.join(__dirname, "../common/index.html"), {encoding: "utf-8"})
-    .pipe(res);
+  responseStaticContent(res, "index.html");
 });
 
-app.get("/common/main.js", (req, res) => {
+app.get("/common/app.js", (req, res) => {
   res.writeHead(200, "OK", {
     "Content-Type": "text/javascript; charset=utf-8"
   });
-  fs.createReadStream(path.join(__dirname, "../common/app.js"), {encoding: "utf-8"})
-    .pipe(res);
+  responseStaticContent(res, "app.js");
 });
+
+app.get("/common/app.LICENSE.txt", (req, res) => {
+  res.writeHead(200, "OK", {
+    "Content-Type": "text/plain; charset=utf-8"
+  });
+  responseStaticContent(res, "app.LICENSE.txt");
+})
 
 app.get("/api/chat", (req, res) => {
   const url = req.query["url"] as string;

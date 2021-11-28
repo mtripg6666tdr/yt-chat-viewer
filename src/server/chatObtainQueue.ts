@@ -7,6 +7,7 @@ import ytdl from "ytdl-core";
 export type chatItem = {
   text:FluffyRun[],
   author:string,
+  mod:boolean,
   icons:AuthorPhotoThumbnail[],
   timestamp:string,
   channelId:string,
@@ -99,6 +100,7 @@ export class chatObtainManager {
               icons: renderer.authorPhoto.thumbnails,
               timestamp: renderer.timestampText.simpleText,
               channelId: renderer.authorExternalChannelId,
+              mod: Boolean(renderer.authorBadges && renderer.authorBadges.findIndex(badge => badge.liveChatAuthorBadgeRenderer.tooltip === "Moderator") >= 0),
             });
           }else if(item.liveChatPaidMessageRenderer){
             const renderer = item.liveChatPaidMessageRenderer;
@@ -109,6 +111,7 @@ export class chatObtainManager {
               timestamp: renderer.timestampText.simpleText,
               channelId: renderer.authorExternalChannelId,
               paid: renderer.purchaseAmountText.simpleText,
+              mod: false,
             });
           }else if(item.liveChatPaidStickerRenderer){
             const renderer = item.liveChatPaidStickerRenderer;
@@ -121,6 +124,7 @@ export class chatObtainManager {
               timestamp: renderer.timestampText.simpleText,
               channelId: renderer.authorExternalChannelId,
               paid: renderer.purchaseAmountText.simpleText,
+              mod: false,
             });
           }
         }

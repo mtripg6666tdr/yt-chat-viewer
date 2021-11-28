@@ -8,9 +8,11 @@ import { displayYouTubeFrame } from "./youtubeDisplayer";
 const newDivElement = "<div></div>";
 const newImgElement = "<img>";
 const newSpanElement = "<span></span>";
+const modIcon = "<svg viewBox='0 0 16 16' xmlns='http://www.w3.org/2000/svg'><g><path d='M9.64589146,7.05569719 C9.83346524,6.562372 9.93617022,6.02722257 9.93617022,5.46808511 C9.93617022,3.00042984 7.93574038,1 5.46808511,1 C4.90894765,1 4.37379823,1.10270499 3.88047304,1.29027875 L6.95744681,4.36725249 L4.36725255,6.95744681 L1.29027875,3.88047305 C1.10270498,4.37379824 1,4.90894766 1,5.46808511 C1,7.93574038 3.00042984,9.93617022 5.46808511,9.93617022 C6.02722256,9.93617022 6.56237198,9.83346524 7.05569716,9.64589147 L12.4098057,15 L15,12.4098057 L9.64589146,7.05569719 Z'></path></g></svg>";
 export function displayChat(data:chatItem[], id:string){
   const rightColumn = $(_rightColumn).empty();
-  rightColumn.css("visibility", "false");
+  rightColumn.css("visibility", "hidden");
+  const chatElems = [] as JQuery<HTMLElement>[];
   for(let i = 0; i < data.length; i++){
     const {
       text, 
@@ -19,8 +21,10 @@ export function displayChat(data:chatItem[], id:string){
       timestamp,
       channelId,
       paid,
+      mod,
     } = data[i];
     const chatContent = $(newDivElement);
+    // スパチャ系の処理
     if(paid) {
       chatContent
       .addClass("c_paid")
@@ -29,6 +33,20 @@ export function displayChat(data:chatItem[], id:string){
         .text("[" + paid + "]")
       );
     }
+    // モデレーターの処理
+    const channelNameElems = [
+      $(newSpanElement)
+      .text(author)
+      .attr("data-cid", channelId)
+      .on("click", chatActions.onUserNameClicked)
+    ];
+    if(mod){
+      channelNameElems.push(
+        $(modIcon)
+      );
+      channelNameElems.forEach(el => el.addClass("c_mod"));
+    }
+    // メッセージ内容の処理
     for(let j = 0; j < text.length; j++){
       if(text[j].text){
         chatContent.append(
@@ -43,8 +61,8 @@ export function displayChat(data:chatItem[], id:string){
         )
       }
     }
-    rightColumn
-    .append(
+    // DOM生成
+    chatElems.push(
       $(newDivElement)
       .addClass("row")
       .append(
@@ -57,10 +75,7 @@ export function displayChat(data:chatItem[], id:string){
       .append(
         $(newDivElement)
         .append(
-          $(newSpanElement)
-          .text(author)
-          .attr("data-cid", channelId)
-          .on("click", chatActions.onUserNameClicked)
+          ...channelNameElems
         )
       )
       .append(
@@ -77,7 +92,9 @@ export function displayChat(data:chatItem[], id:string){
     );
     status.textContent = `処理中...(${i + 1}件/${data.length}件)`;
   }
-  rightColumn.css("visibility", "true");
+  status.textContent = "処理中...";
+  rightColumn.append(...chatElems);
+  rightColumn.css("visibility", "visible");
 
   displayYouTubeFrame(videoFrameHolder.id, id);
 
@@ -100,7 +117,7 @@ export function displayChat(data:chatItem[], id:string){
   data.forEach(item => userMessageCount[item.author] = (userMessageCount[item.author] || 0) + 1);
   const messageCounts = Object.values(userMessageCount)
   const max = messageCounts.reduce((a, b) => a > b ? a : b);
-  const min = messageCounts.reduce((a, b) => a > b ? b : a);
+  const min = messageCounts.reduce((a, b) => a < b ? a : b);
   // スパチャ数計算
   let scCount = 0;
   data.forEach(item => scCount += item.paid ? 1 : 0);
