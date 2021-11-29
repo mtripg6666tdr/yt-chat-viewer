@@ -185,14 +185,14 @@ export class chatObtainManager {
         }
       }
       const maxCacheSize = Number(process.env["CACHE_SIZE"]);
-      if(!isNaN(maxCacheSize)){
+      if(!isNaN(maxCacheSize) && maxCacheSize > 0 && fs.existsSync("./cache")){
         const cached = fs.readdirSync("./cache", {withFileTypes: true})
           .filter(d => d.isFile())
           .map(d => ({
             name: d.name,
             stat: fs.statSync("./cache/" + d.name)
           }));
-        const totalSize = cached.map(d => d.stat.size).reduce((a, b) => a + b);
+        const totalSize = cached[0] ? cached.map(d => d.stat.size).reduce((a, b) => a + b) : 0;
         if(totalSize > 1024 /* KB */ * 1024 /* MB */ * maxCacheSize){
           cached.sort((a, b) => b.stat.ctimeMs - a.stat.ctimeMs);
           do{
