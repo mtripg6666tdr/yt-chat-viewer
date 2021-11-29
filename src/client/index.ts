@@ -23,10 +23,10 @@ export const videoFrameHolder = document.getElementById("v_frame") as HTMLDivEle
   sendButton.addEventListener("click", () => {
     urlBox.disabled = true;
     sendButton.disabled = true;
-    const errorHandler = () => {
+    const errorHandler = (message:string) => {
       urlBox.disabled = false;
       sendButton.disabled = false;
-      status.textContent = "チャットの取得に失敗しました";
+      status.textContent = `チャットの取得に失敗しました(${message})`;
     };
     const dataReceive = () => {
       fetch(`/api/chat?url=${urlBox.value}`)
@@ -34,12 +34,12 @@ export const videoFrameHolder = document.getElementById("v_frame") as HTMLDivEle
         res.json().then(((data) => {
           if(data.state === "OK"){
             status.textContent = "処理中...";
-            setTimeout(() => displayChat(data.chatItem, data.id), 300);
+            setTimeout(() => displayChat(data.chatItem, data.id), 100);
           }else if(data.state === "preparing"){
             status.textContent = "準備中...\r\n" + data.log;
             setTimeout(dataReceive, 2000);
           }else{
-            errorHandler();
+            errorHandler(data.state === "error" ? data.message : "undefined");
           }
         }) as ((data:chatStatus)=>void))
         .catch(errorHandler);

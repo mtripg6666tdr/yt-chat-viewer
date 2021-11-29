@@ -24,6 +24,7 @@ export type chatNotFoundStatus = {
 }
 export type chatErrorStatus = {
   state:"error";
+  message:string;
 }
 export type chatPreparingStatus = {
   state:"preparing";
@@ -54,7 +55,8 @@ export class chatObtainManager {
         };
       }else{
         return {
-          state: "error"
+          state: "error",
+          message: "チャット情報の取得時に問題が発生しました"
         };
       }
     }else{
@@ -64,8 +66,14 @@ export class chatObtainManager {
     }
   }
 
-  get(url:string):chatStatus{
-    const id = SHA1(url).toString();
+  async get(url:string):Promise<chatStatus>{
+    if(!ytdl.validateURL(url)){
+      return {
+        state: "error",
+        message: "有効なURLではありません"
+      }
+    }
+    const id = SHA1("https://www.youtube.com/watch?v=" + ytdl.getVideoID(url)).toString();
     const filePath = `./cache/${id}.live_chat.json`;
     if(fs.existsSync(filePath)){
       if(this.procs[id]){
@@ -82,7 +90,8 @@ export class chatObtainManager {
         }
         catch{
           return {
-            state: "error"
+            state: "error",
+            message: "チャット情報の解析に失敗しました"
           };
         }
       }
@@ -141,14 +150,56 @@ export class chatObtainManager {
           log: this.procs[id].log,
         };
       }else{
+        delete this.procs[id];
         return {
-          state: "error"
+          state: "error",
+          message: "チャット情報取得時に問題が発生しました"
         };
       }
     }else{
-      if(!ytdl.validateURL(url)){
+      let basic = null as ytdl.videoInfo;
+      try{
+        basic = await ytdl.getBasicInfo(url);
+      }
+      catch{
         return {
-          state: "error"
+          state: "error",
+          message: "データを取得できません"
+        }
+      }
+      if(!basic.videoDetails.liveBroadcastDetails){
+        return {
+          state: "error",
+          message: "ライブ配信/プレミア公開の動画ではありません"
+        }
+      }else if(basic.videoDetails.liveBroadcastDetails.isLiveNow){
+        return {
+          state: "error",
+          message: "ライブ配信/プレミア公開は現在進行中です"
+        }
+        // @ts-ignore
+      }else if(!basic.videoDetails.liveBroadcastDetails.endTimestamp){
+        return {
+          state: "error",
+          message: "ライブ配信/プレミア公開は開始されていません"
+        }
+      }
+      const maxCacheSize = Number(process.env["CACHE_SIZE"]);
+      if(!isNaN(maxCacheSize)){
+        const cached = fs.readdirSync("./cache", {withFileTypes: true})
+          .filter(d => d.isFile())
+          .map(d => ({
+            name: d.name,
+            stat: fs.statSync("./cache/" + d.name)
+          }));
+        const totalSize = cached.map(d => d.stat.size).reduce((a, b) => a + b);
+        if(totalSize > 1024 /* KB */ * 1024 /* MB */ * maxCacheSize){
+          cached.sort((a, b) => b.stat.ctimeMs - a.stat.ctimeMs);
+          do{
+            if(cached.length === 0) break;
+            fs.unlinkSync("./cache/" + cached.shift().name);
+          }while(cached.length > 0 && 
+            cached.map(d => d.stat.size).reduce((a, b) => a + b) >= 1024 * 1024 * maxCacheSize);
         }
       }
       const proc = spawn("./yt-dlp", [

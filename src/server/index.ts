@@ -1,3 +1,4 @@
+require("dotenv").config();
 import express from "express";
 import { chatObtainManager } from "./chatObtainQueue";
 import { responseStaticContent } from "./util";
@@ -26,12 +27,12 @@ app.get("/common/app.js.LICENSE.txt", (req, res) => {
   responseStaticContent(res, "app.js.LICENSE.txt");
 })
 
-app.get("/api/chat", (req, res) => {
+app.get("/api/chat", async (req, res) => {
   const url = req.query["url"] as string;
   res.writeHead(200, "OK", {
     "Content-Type": "application/json; charset=utf-8"
   });
-  res.end(JSON.stringify(queue.get(url)));
+  res.end(JSON.stringify(await queue.get(url)));
 });
 
 const server = app.listen(80);
